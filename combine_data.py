@@ -7,6 +7,8 @@ import datetime
 
 def main():
     header = [['MJD','V-mag','SE','air mass']]
+    header2 = [['Avg MJD','Avg V-mag','Avg SE','Avg Air Mass','Observation Count']]
+
     combined = read_all_csvs()
     combined = clean_bad_data(combined)
     combined = sorted(combined,key=getKey)
@@ -19,35 +21,40 @@ def main():
     write_csv(header+combined_good_air,"bruce_gary_raw_data_good_air_combined")
     scatter_plot(combined_good_air,plot_name="scatter_good_air", plot_title="Bruce Gary Raw Data Air Mass <= 2.5",marker_size=1)
     daily_bins = get_daily_binned_data(combined_good_air)
-    write_csv(header+daily_bins,"bruce_gary_raw_data_good_air_daily_bins")
+    write_csv(header2+daily_bins,"bruce_gary_raw_data_good_air_daily_bins")
     scatter_plot(daily_bins,plot_name="scatter_good_air_daily_bins", plot_title="Bruce Gary Daily Bins Air Mass <= 2.5",marker_size=16)
     print(daily_bins)
 
 def get_daily_binned_data(data):
     days = []
-    day_x_sum = []
-    day_y_sum = []
+    day_time_sum = []
+    day_mag_sum = []
+    day_se_sum = []
+    day_airmass_sum = []
     day_counts = []
     for i in range(len(data)):
         x = int(float(data[i][0]))
         if(x not in days):
             days.append(x)
-            day_x_sum.append(0)
-            day_y_sum.append(0)
+            day_time_sum.append(0)
+            day_mag_sum.append(0)
+            day_se_sum.append(0)
+            day_airmass_sum.append(0)
             day_counts.append(0)
         index = days.index(x)
-        day_x_sum[index] += float(data[i][0])
-        day_y_sum[index] += float(data[i][1])
+        day_time_sum[index] += float(data[i][0])
+        day_mag_sum[index] += float(data[i][1])
+        day_se_sum[index] += float(data[i][2])
+        day_airmass_sum[index] += float(data[i][3])
         day_counts[index] += 1
     binned = []
     for i in range(len(days)):
-        x_avg = day_x_sum[i]/day_counts[i]
-        y_avg = day_y_sum[i]/day_counts[i]
-        binned.append([x_avg,y_avg])
+        time_avg = day_time_sum[i]/day_counts[i]
+        mag_avg = day_mag_sum[i]/day_counts[i]
+        se_avg = day_se_sum[i]/day_counts[i]
+        airmass_avg = day_airmass_sum[i]/day_counts[i]
+        binned.append([time_avg,mag_avg,se_avg,airmass_avg,day_counts[i]])
     return binned
-
-
-
 
 def filter_by_air_mass(data):
     filtered = []
@@ -72,7 +79,7 @@ def scatter_plot(combined, plot_name, plot_title, marker_size):
     plt.gca().invert_yaxis()
     plt.gcf().autofmt_xdate()
     plt.grid()
-    plt.scatter(x,y,s=marker_size,marker='s')
+    plt.scatter(x,y,s=marker_size,marker='o')
     plt.savefig("SavedPlots/" + plot_name + ".png")
     plt.show()
 
