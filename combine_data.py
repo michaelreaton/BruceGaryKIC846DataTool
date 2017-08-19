@@ -7,15 +7,28 @@ import datetime
 
 
 def main():
+    header = [['MJD','V-mag','SE','air mass']]
     combined = read_all_csvs()
     combined = clean_bad_data(combined)
     combined = sorted(combined,key=getKey)
+    combined_good_air = filter_by_air_mass(combined)
     print('#observations:',len(combined))
-    combined = [['MJD','V-mag','SE','air mass']] + combined
-    write_combined_csv(combined)
-    raw_plot(combined)
+    print('#observations air mass <= 2.5:',len(combined_good_air))
 
-def raw_plot(combined):
+    write_csv(header+combined,"bruce_gary_raw_data_combined")
+    scatter_plot(combined,plot_name="scatter", plot_title="Bruce Gary Raw Data Unmodified")
+    write_csv(header+combined_good_air,"bruce_gary_raw_data_good_air_combined")
+    scatter_plot(combined_good_air,plot_name="scatter_good_air", plot_title="Bruce Gary Raw Data air mass <= 2.5")
+
+
+def filter_by_air_mass(data):
+    filtered = []
+    for i in range(1,len(data)):
+        if(float(data[i][3]) <= 2.5):
+            filtered.append(data[i])
+    return filtered
+
+def scatter_plot(combined, plot_name, plot_title):
     x = []
     y = []
     for i in range(1,len(combined)):
@@ -26,13 +39,13 @@ def raw_plot(combined):
     plt.ylabel("V-Mag")
     start_date = x[0]
     end_date = x[len(x)-1]
-    title = "Bruce Gary Raw Data (" + str(start_date) + " to " + str(end_date) + ")"
+    title = plot_title + "\n(" + str(start_date) + " to " + str(end_date) + ")"
     plt.title(title)
     plt.gca().invert_yaxis()
     plt.gcf().autofmt_xdate()
     plt.grid()
     plt.scatter(x,y,s=1,marker='s')
-    plt.savefig("SavedPlots/scatter.png")
+    plt.savefig("SavedPlots/" + plot_name + ".png")
     plt.show()
 
 def mjddates_to_gregoriandates(mjd):
@@ -47,15 +60,15 @@ def clean_bad_data(combined):
     clean = []
     bad_data_point_counter = 0
     for i in range(len(combined)):
-        if(len(combined[i]) == 4 and is_float(combined[i][0]) and is_float(combined[i][1])):
+        if(len(combined[i]) == 4 and is_float(combined[i][0]) and is_float(combined[i][1]) and is_float(combined[i][2]) and is_float(combined[i][3])):
             clean.append(combined[i])
         else:
             bad_data_point_counter+=1
     print("bad data points discarded:", bad_data_point_counter)
     return clean
 
-def write_combined_csv(list):
-    with open("Combined/bruce_gary_raw_data_combined.csv", "w") as data_file:
+def write_csv(list, name):
+    with open("Combined/" + name + ".csv", "w") as data_file:
         writer = csv.writer(data_file,lineterminator='\n')
         writer.writerows(list)
 
