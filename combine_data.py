@@ -1,6 +1,9 @@
 import csv
 import glob
 import matplotlib.pyplot as plt
+import matplotlib.ticker as tkr
+import matplotlib.dates as mdates
+import datetime
 
 
 def main():
@@ -10,21 +13,35 @@ def main():
     print('#observations:',len(combined))
     combined = [['MJD','V-mag','SE','air mass']] + combined
     write_combined_csv(combined)
-    bin_and_plot(combined)
+    raw_plot(combined)
 
-def bin_and_plot(combined):
+def raw_plot(combined):
     x = []
     y = []
     for i in range(1,len(combined)):
         x.append(float(combined[i][0]))
         y.append(float(combined[i][1]))
-    plt.xlabel("MJD")
+    x = mjddates_to_gregoriandates(x)
+    plt.xlabel("Date")
     plt.ylabel("V-Mag")
-    plt.title("Bruce Gary Raw Data")
+    start_date = x[0]
+    end_date = x[len(x)-1]
+    title = "Bruce Gary Raw Data (" + str(start_date) + " to " + str(end_date) + ")"
+    plt.title(title)
     plt.gca().invert_yaxis()
+    plt.gcf().autofmt_xdate()
+    plt.grid()
     plt.scatter(x,y,s=1,marker='s')
     plt.savefig("SavedPlots/scatter.png")
     plt.show()
+
+def mjddates_to_gregoriandates(mjd):
+    dates = [mjd_to_gregorian(mjd_val) for mjd_val in mjd]
+    return dates
+
+def mjd_to_gregorian(mjd_val):
+    start_date = datetime.date(1858, 11, 17)
+    return start_date + datetime.timedelta(mjd_val)
 
 def clean_bad_data(combined):
     clean = []
