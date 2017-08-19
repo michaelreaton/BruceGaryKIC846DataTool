@@ -1,8 +1,7 @@
 import csv
 import glob
 import matplotlib.pyplot as plt
-import matplotlib.ticker as tkr
-import matplotlib.dates as mdates
+import numpy as np
 import datetime
 
 
@@ -16,9 +15,38 @@ def main():
     print('#observations air mass <= 2.5:',len(combined_good_air))
 
     write_csv(header+combined,"bruce_gary_raw_data_combined")
-    scatter_plot(combined,plot_name="scatter", plot_title="Bruce Gary Raw Data Unmodified")
+    scatter_plot(combined,plot_name="scatter", plot_title="Bruce Gary Raw Data Unmodified",marker_size=1)
     write_csv(header+combined_good_air,"bruce_gary_raw_data_good_air_combined")
-    scatter_plot(combined_good_air,plot_name="scatter_good_air", plot_title="Bruce Gary Raw Data air mass <= 2.5")
+    scatter_plot(combined_good_air,plot_name="scatter_good_air", plot_title="Bruce Gary Raw Data Air Mass <= 2.5",marker_size=1)
+    daily_bins = get_daily_binned_data(combined_good_air)
+    write_csv(header+daily_bins,"bruce_gary_raw_data_good_air_daily_bins")
+    scatter_plot(daily_bins,plot_name="scatter_good_air_daily_bins", plot_title="Bruce Gary Daily Bins Air Mass <= 2.5",marker_size=16)
+    print(daily_bins)
+
+def get_daily_binned_data(data):
+    days = []
+    day_x_sum = []
+    day_y_sum = []
+    day_counts = []
+    for i in range(len(data)):
+        x = int(float(data[i][0]))
+        if(x not in days):
+            days.append(x)
+            day_x_sum.append(0)
+            day_y_sum.append(0)
+            day_counts.append(0)
+        index = days.index(x)
+        day_x_sum[index] += float(data[i][0])
+        day_y_sum[index] += float(data[i][1])
+        day_counts[index] += 1
+    binned = []
+    for i in range(len(days)):
+        x_avg = day_x_sum[i]/day_counts[i]
+        y_avg = day_y_sum[i]/day_counts[i]
+        binned.append([x_avg,y_avg])
+    return binned
+
+
 
 
 def filter_by_air_mass(data):
@@ -28,7 +56,7 @@ def filter_by_air_mass(data):
             filtered.append(data[i])
     return filtered
 
-def scatter_plot(combined, plot_name, plot_title):
+def scatter_plot(combined, plot_name, plot_title, marker_size):
     x = []
     y = []
     for i in range(1,len(combined)):
@@ -44,7 +72,7 @@ def scatter_plot(combined, plot_name, plot_title):
     plt.gca().invert_yaxis()
     plt.gcf().autofmt_xdate()
     plt.grid()
-    plt.scatter(x,y,s=1,marker='s')
+    plt.scatter(x,y,s=marker_size,marker='s')
     plt.savefig("SavedPlots/" + plot_name + ".png")
     plt.show()
 
