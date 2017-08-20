@@ -14,15 +14,15 @@ def main():
     combined = sorted(combined,key=getKey)
     combined_good_air = filter_by_air_mass(combined)
     print('#observations:',len(combined))
-    print('#observations air mass <= 2.5:',len(combined_good_air))
+    print('#observations air mass <= 2.0:',len(combined_good_air))
 
     write_csv(header+combined,"bruce_gary_raw_data_combined")
     scatter_plot(combined,plot_name="scatter", plot_title="Bruce Gary Raw Data Unmodified",marker_size=1)
     write_csv(header+combined_good_air,"bruce_gary_raw_data_good_air_combined")
-    scatter_plot(combined_good_air,plot_name="scatter_good_air", plot_title="Bruce Gary Raw Data Air Mass <= 2.5",marker_size=1)
+    scatter_plot(combined_good_air,plot_name="scatter_good_air", plot_title="Bruce Gary Raw Data Air Mass <= 2.0",marker_size=1)
     daily_bins = get_daily_binned_data(combined_good_air)
     write_csv(header2+daily_bins,"bruce_gary_raw_data_good_air_daily_bins")
-    scatter_plot(daily_bins,plot_name="scatter_good_air_daily_bins", plot_title="Bruce Gary Daily Bins Air Mass <= 2.5",marker_size=16)
+    scatter_plot(daily_bins,plot_name="scatter_good_air_daily_bins", plot_title="Bruce Gary Daily Bins Air Mass <= 2.0",marker_size=16)
     print(daily_bins)
 
 def get_daily_binned_data(data):
@@ -59,7 +59,7 @@ def get_daily_binned_data(data):
 def filter_by_air_mass(data):
     filtered = []
     for i in range(1,len(data)):
-        if(float(data[i][3]) <= 2.5):
+        if(float(data[i][3]) <= 2.0):
             filtered.append(data[i])
     return filtered
 
