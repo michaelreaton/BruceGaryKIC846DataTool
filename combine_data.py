@@ -75,11 +75,15 @@ def scatter_plot(combined, plot_name, plot_title, marker_size):
     start_date = x[0]
     end_date = x[len(x)-1]
     title = plot_title + "\n(" + str(start_date) + " to " + str(end_date) + ")"
+    # default scale is 1 in your original case, scales with other cases:
+
     plt.title(title)
     plt.gca().invert_yaxis()
     plt.gcf().autofmt_xdate()
     plt.grid()
     plt.scatter(x,y,s=marker_size,marker='o')
+    plt.tight_layout()
+    plt.rcParams["figure.figsize"] = (8,4.5)
     plt.savefig("SavedPlots/" + plot_name + ".png")
     plt.show()
 
