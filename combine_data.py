@@ -7,7 +7,7 @@ import datetime
 
 def main():
     header = [['MJD','V-mag','SE','air mass']]
-    header2 = [['Avg MJD','Avg V-mag','Avg SE','Avg Air Mass','Observation Count']]
+    header2 = [['Avg MJD','Avg V-mag','Avg SE','Avg Air Mass','Observation Count','Uncertainty']]
 
     combined = read_all_csvs()
     combined = clean_bad_data(combined)
