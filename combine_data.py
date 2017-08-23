@@ -67,9 +67,14 @@ def filter_by_air_mass(data):
 def scatter_plot(combined, plot_name, plot_title, marker_size):
     x = []
     y = []
+    error = []
     for i in range(1,len(combined)):
         x.append(float(combined[i][0]))
         y.append(float(combined[i][1]))
+        if len(combined[i]) > 5:
+            error.append(combined[i][5])
+        else:
+            error.append(0)
     x = mjddates_to_gregoriandates(x)
     plt.xlabel("Date")
     plt.ylabel("V-Mag")
@@ -82,9 +87,12 @@ def scatter_plot(combined, plot_name, plot_title, marker_size):
     plt.gca().invert_yaxis()
     plt.gcf().autofmt_xdate()
     plt.grid()
-    plt.scatter(x,y,s=marker_size,marker='o')
+    if len(combined[0]) < 6:
+        plt.scatter(x, y, s=marker_size, marker='o')
+    else:
+        plt.errorbar(x=x,y=y, yerr=error, fmt='o',markersize=4.0)
     plt.tight_layout()
-    plt.rcParams["figure.figsize"] = (8,4.5)
+    plt.rcParams["figure.figsize"] = (8, 4.5)
     plt.savefig("SavedPlots/" + plot_name + ".png")
     plt.show()
 
