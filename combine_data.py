@@ -1,7 +1,7 @@
 import csv
 import glob
 import matplotlib.pyplot as plt
-import numpy as np
+import math
 import datetime
 
 
@@ -53,7 +53,8 @@ def get_daily_binned_data(data):
         mag_avg = day_mag_sum[i]/day_counts[i]
         se_avg = day_se_sum[i]/day_counts[i]
         airmass_avg = day_airmass_sum[i]/day_counts[i]
-        binned.append([time_avg,mag_avg,se_avg,airmass_avg,day_counts[i]])
+        uncertainty = se_avg/math.sqrt(day_counts[i])
+        binned.append([time_avg,mag_avg,se_avg,airmass_avg,day_counts[i],uncertainty])
     return binned
 
 def filter_by_air_mass(data):
