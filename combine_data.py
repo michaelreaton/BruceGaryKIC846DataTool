@@ -3,7 +3,13 @@ import glob
 import matplotlib.pyplot as plt
 import math
 import datetime
+import numpy as np
+import scipy.optimize as opt
 
+
+start_mag = 11.905
+# excluded short term dips based on https://www.reddit.com/r/KIC8462852/wiki/faq/timeline
+dip_mjd_ranges = [[57891.,57897.],[57915.,57940.],[57964.,57981.]]
 
 def main():
     header = [['MJD','V-mag','SE','air mass']]
@@ -20,42 +26,93 @@ def main():
     scatter_plot(combined,plot_name="scatter", plot_title="Bruce Gary Raw Data Unmodified",marker_size=1)
     write_csv(header+combined_good_air,"bruce_gary_raw_data_good_air_combined")
     scatter_plot(combined_good_air,plot_name="scatter_good_air", plot_title="Bruce Gary Raw Data Air Mass <= 2.0",marker_size=1)
-    daily_bins = get_daily_binned_data(combined_good_air)
+    #daily_bins = get_daily_binned_data(combined_good_air)
+    daily_bins = get_bins(combined_good_air,60*60*24)
     write_csv(header2+daily_bins,"bruce_gary_raw_data_good_air_daily_bins")
     scatter_plot(daily_bins,plot_name="scatter_good_air_daily_bins", plot_title="Bruce Gary Daily Bins Air Mass <= 2.0",marker_size=16)
-    print(daily_bins)
+    #print(daily_bins)
+    dips_excluded = exclude_dips(combined_good_air)
 
-def get_daily_binned_data(data):
-    days = []
-    day_time_sum = []
-    day_mag_sum = []
-    day_se_sum = []
-    day_airmass_sum = []
-    day_counts = []
-    for i in range(len(data)):
-        x = int(float(data[i][0]))
-        if(x not in days):
-            days.append(x)
-            day_time_sum.append(0)
-            day_mag_sum.append(0)
-            day_se_sum.append(0)
-            day_airmass_sum.append(0)
-            day_counts.append(0)
-        index = days.index(x)
-        day_time_sum[index] += float(data[i][0])
-        day_mag_sum[index] += float(data[i][1])
-        day_se_sum[index] += float(data[i][2])
-        day_airmass_sum[index] += float(data[i][3])
-        day_counts[index] += 1
+    daily_bins_dips_excluded = get_bins(dips_excluded,60*60*24)
+    write_csv(header2+daily_bins_dips_excluded,"bruce_gary_raw_data_good_air_daily_bins_dips_excluded")
+    scatter_plot(daily_bins_dips_excluded,plot_name="scatter_good_air_daily_bins_dips_excluded", plot_title="Bruce Gary Daily Bins (Dips Excluded) Air Mass <= 2.0",marker_size=16,fit_type="linear")
+
+def get_bins(data_list,bin_seconds):
+    #data_list = filter_to_mjd(data_list,mjd)
+    bin_increment = (1./(24.*60.*60.))*bin_seconds
+    start = float(data_list[0][0])
+    end = float(data_list[len(data_list)-1][0])
+    if bin_seconds == 60*60*24:
+        start = int(start)
+        end = int(end)
+        bin_increment = 1
+    bin_count = int((start-end)/bin_increment)+1
+    bins = []
+    bin_time_sum = []
+    bin_mag_sum = []
+    bin_se_sum = []
+    bin_airmass_sum = []
+    bin_counts = []
+    for i in range(len(data_list)):
+        relative_mjd = float(data_list[i][0])-float(start)
+        if bin_seconds == 60*60*24:
+            bin = int(relative_mjd)
+        else:
+            bin = int(relative_mjd/bin_increment)
+        if bin not in bins:
+            bins.append(bin)
+            bin_time_sum.append(0)
+            bin_mag_sum.append(0)
+            bin_se_sum.append(0)
+            bin_airmass_sum.append(0)
+            bin_counts.append(0)
+        index = bins.index(bin)
+        bin_time_sum[index] += float(data_list[i][0])
+        bin_mag_sum[index] += float(data_list[i][1])
+        bin_se_sum[index] += float(data_list[i][2])
+        bin_airmass_sum[index] += float(data_list[i][3])
+        bin_counts[index]+=1
     binned = []
-    for i in range(len(days)):
-        time_avg = day_time_sum[i]/day_counts[i]
-        mag_avg = day_mag_sum[i]/day_counts[i]
-        se_avg = day_se_sum[i]/day_counts[i]
-        airmass_avg = day_airmass_sum[i]/day_counts[i]
-        uncertainty = se_avg/math.sqrt(day_counts[i])
-        binned.append([time_avg,mag_avg,se_avg,airmass_avg,day_counts[i],uncertainty])
+    for i in range(len(bins)):
+        time_avg = bin_time_sum[i]/bin_counts[i]
+        mag_avg = bin_mag_sum[i]/bin_counts[i]
+        se_avg = bin_se_sum[i]/bin_counts[i]
+        airmass_avg = bin_airmass_sum[i]/bin_counts[i]
+        uncertainty = se_avg/math.sqrt(bin_counts[i])
+        binned.append([time_avg,mag_avg,se_avg,airmass_avg,bin_counts[i],uncertainty])
     return binned
+
+# def get_daily_binned_data(data):
+#     days = []
+#     day_time_sum = []
+#     day_mag_sum = []
+#     day_se_sum = []
+#     day_airmass_sum = []
+#     day_counts = []
+#     for i in range(len(data)):
+#         x = int(float(data[i][0]))
+#         if(x not in days):
+#             days.append(x)
+#             day_time_sum.append(0)
+#             day_mag_sum.append(0)
+#             day_se_sum.append(0)
+#             day_airmass_sum.append(0)
+#             day_counts.append(0)
+#         index = days.index(x)
+#         day_time_sum[index] += float(data[i][0])
+#         day_mag_sum[index] += float(data[i][1])
+#         day_se_sum[index] += float(data[i][2])
+#         day_airmass_sum[index] += float(data[i][3])
+#         day_counts[index] += 1
+#     binned = []
+#     for i in range(len(days)):
+#         time_avg = day_time_sum[i]/day_counts[i]
+#         mag_avg = day_mag_sum[i]/day_counts[i]
+#         se_avg = day_se_sum[i]/day_counts[i]
+#         airmass_avg = day_airmass_sum[i]/day_counts[i]
+#         uncertainty = se_avg/math.sqrt(day_counts[i])
+#         binned.append([time_avg,mag_avg,se_avg,airmass_avg,day_counts[i],uncertainty])
+#     return binned
 
 def filter_by_air_mass(data):
     filtered = []
@@ -64,17 +121,26 @@ def filter_by_air_mass(data):
             filtered.append(data[i])
     return filtered
 
-def scatter_plot(combined, plot_name, plot_title, marker_size):
+def lin_func(x, a):
+    return start_mag+(a*x)
+
+def gaussian_func(x, a, mu, sigma):
+    return a * np.exp(-(x - mu) ** 2 / (2. * sigma ** 2))
+
+def scatter_plot(combined, plot_name, plot_title, marker_size, fit_type="none"):
     x = []
     y = []
     error = []
-    for i in range(1,len(combined)):
+    for i in range(len(combined)):
         x.append(float(combined[i][0]))
         y.append(float(combined[i][1]))
         if len(combined[i]) > 5:
             error.append(combined[i][5])
         else:
             error.append(0)
+    x = np.array(x).astype("float")
+    y = np.array(y).astype("float")
+    x_float = np.array(x).astype("float")
     x = mjddates_to_gregoriandates(x)
     plt.xlabel("Date")
     plt.ylabel("V-Mag")
@@ -91,10 +157,41 @@ def scatter_plot(combined, plot_name, plot_title, marker_size):
         plt.scatter(x, y, s=marker_size, marker='o')
     else:
         plt.errorbar(x=x,y=y, yerr=error, fmt='o',markersize=4.0)
-    plt.tight_layout()
+    #plt.tight_layout()
     plt.rcParams["figure.figsize"] = (8, 4.5)
+
+    #x_inc, y_inc = exclude_dips(x_float,y)
+    if fit_type=="linear":
+        optimizedParameters, pcov = opt.curve_fit(lin_func, x_float-x_float[0], y)
+        print(*optimizedParameters)
+        plt.plot(x, lin_func(x_float-x_float[0], *optimizedParameters), label="linear fit")
+
+    if fit_type=="gaussian":
+        X = np.arange(len(x_float))
+        mu_guess = np.sum(X * y) / np.sum(y)
+        sigma_guess = np.sqrt(np.abs(np.sum((X - x_float) ** 2 * y) / np.sum(y)))
+
+        a_guess = y.max()
+        optimizedParameters, pcov = opt.curve_fit(gaussian_func,x_float-x_float[0] ,y,p0=[a_guess, mu_guess, sigma_guess],maxfev=10000)
+        print(*optimizedParameters)
+        plt.plot(x, gaussian_func(x_float-x_float[0] , *optimizedParameters), label="gaussian fit")
     plt.savefig("SavedPlots/" + plot_name + ".png")
     plt.show()
+
+def exclude_dips(data):
+    data_inc = []
+    exclude_count = 0
+    for i in range(1,len(data)):
+        exclude = 0
+        for j in range(len(dip_mjd_ranges)):
+            if float(data[i][0]) >= dip_mjd_ranges[j][0] and float(data[i][0]) <= dip_mjd_ranges[j][1]:
+                exclude_count += 1
+                exclude = 1
+        if exclude == 0:
+            data_inc.append([data[i][0],data[i][1],data[i][2],data[i][3]])
+    data_inc = np.array(data_inc)
+    print("excluded for fitting: ", exclude_count)
+    return data_inc
 
 def mjddates_to_gregoriandates(mjd):
     dates = [mjd_to_gregorian(mjd_val) for mjd_val in mjd]
