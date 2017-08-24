@@ -30,9 +30,11 @@ def main():
     daily_bins = get_bins(combined_good_air,60*60*24)
     write_csv(header2+daily_bins,"bruce_gary_raw_data_good_air_daily_bins")
     scatter_plot(daily_bins,plot_name="scatter_good_air_daily_bins", plot_title="Bruce Gary Daily Bins Air Mass <= 2.0",marker_size=16)
+    hourly_bins = get_bins(combined_good_air,60*60)
+    write_csv(header2+hourly_bins,"bruce_gary_raw_data_good_air_hourly_bins")
+    scatter_plot(hourly_bins,plot_name="scatter_good_air_hourly_bins", plot_title="Bruce Gary Hourly Bins Air Mass <= 2.0",marker_size=16)
     #print(daily_bins)
     dips_excluded = exclude_dips(combined_good_air)
-
     daily_bins_dips_excluded = get_bins(dips_excluded,60*60*24)
     write_csv(header2+daily_bins_dips_excluded,"bruce_gary_raw_data_good_air_daily_bins_dips_excluded")
     scatter_plot(daily_bins_dips_excluded,plot_name="scatter_good_air_daily_bins_dips_excluded", plot_title="Bruce Gary Daily Bins (Dips Excluded) Air Mass <= 2.0",marker_size=16,fit_type="linear")
