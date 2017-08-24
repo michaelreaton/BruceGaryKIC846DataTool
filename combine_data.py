@@ -8,8 +8,10 @@ import scipy.optimize as opt
 
 
 start_mag = 11.905
-# excluded short term dips based on https://www.reddit.com/r/KIC8462852/wiki/faq/timeline
 dip_mjd_ranges = [[57891.,57897.],[57915.,57940.],[57964.,57981.]]
+elsie_range = [[57875.,57908.]]
+celeste_range = [[57910.,57930.]]
+skara_brae_range = [[57969.,57988.]]
 
 def main():
     header = [['MJD','V-mag','SE','air mass']]
@@ -33,11 +35,21 @@ def main():
     hourly_bins = get_bins(combined_good_air,60*60)
     write_csv(header2+hourly_bins,"bruce_gary_raw_data_good_air_hourly_bins")
     scatter_plot(hourly_bins,plot_name="scatter_good_air_hourly_bins", plot_title="Bruce Gary Hourly Bins Air Mass <= 2.0",marker_size=16)
+
+    elsie_hourly_bins = include_data(hourly_bins,elsie_range)
+    scatter_plot(elsie_hourly_bins,plot_name="scatter_good_air_hourly_bins_elsie", plot_title="Bruce Gary Hourly Bins Elsie Air Mass <= 2.0",marker_size=16)
+
+    celeste_hourly_bins = include_data(hourly_bins,celeste_range)
+    scatter_plot(celeste_hourly_bins,plot_name="scatter_good_air_hourly_bins_celeste", plot_title="Bruce Gary Hourly Bins Celeste Air Mass <= 2.0",marker_size=16)
+
+    skara_brae_hourly_bins = include_data(hourly_bins,skara_brae_range)
+    scatter_plot(skara_brae_hourly_bins,plot_name="scatter_good_air_hourly_bins_skara_brae", plot_title="Bruce Gary Hourly Bins Skara Brae Air Mass <= 2.0",marker_size=16)
+
     #print(daily_bins)
-    dips_excluded = exclude_dips(combined_good_air)
+    dips_excluded = exclude_data(combined_good_air, dip_mjd_ranges)
     daily_bins_dips_excluded = get_bins(dips_excluded,60*60*24)
     write_csv(header2+daily_bins_dips_excluded,"bruce_gary_raw_data_good_air_daily_bins_dips_excluded")
-    scatter_plot(daily_bins_dips_excluded,plot_name="scatter_good_air_daily_bins_dips_excluded", plot_title="Bruce Gary Daily Bins (Dips Excluded) Air Mass <= 2.0",marker_size=16,fit_type="linear")
+    scatter_plot(daily_bins_dips_excluded,plot_name="scatter_good_air_daily_bins_dips_excluded", plot_title="Bruce Gary Daily Bins (Dips Excluded) Air Mass <= 2.0",marker_size=16,fit_type="gaussian")
 
 def get_bins(data_list,bin_seconds):
     #data_list = filter_to_mjd(data_list,mjd)
@@ -84,38 +96,6 @@ def get_bins(data_list,bin_seconds):
         binned.append([time_avg,mag_avg,se_avg,airmass_avg,bin_counts[i],uncertainty])
     return binned
 
-# def get_daily_binned_data(data):
-#     days = []
-#     day_time_sum = []
-#     day_mag_sum = []
-#     day_se_sum = []
-#     day_airmass_sum = []
-#     day_counts = []
-#     for i in range(len(data)):
-#         x = int(float(data[i][0]))
-#         if(x not in days):
-#             days.append(x)
-#             day_time_sum.append(0)
-#             day_mag_sum.append(0)
-#             day_se_sum.append(0)
-#             day_airmass_sum.append(0)
-#             day_counts.append(0)
-#         index = days.index(x)
-#         day_time_sum[index] += float(data[i][0])
-#         day_mag_sum[index] += float(data[i][1])
-#         day_se_sum[index] += float(data[i][2])
-#         day_airmass_sum[index] += float(data[i][3])
-#         day_counts[index] += 1
-#     binned = []
-#     for i in range(len(days)):
-#         time_avg = day_time_sum[i]/day_counts[i]
-#         mag_avg = day_mag_sum[i]/day_counts[i]
-#         se_avg = day_se_sum[i]/day_counts[i]
-#         airmass_avg = day_airmass_sum[i]/day_counts[i]
-#         uncertainty = se_avg/math.sqrt(day_counts[i])
-#         binned.append([time_avg,mag_avg,se_avg,airmass_avg,day_counts[i],uncertainty])
-#     return binned
-
 def filter_by_air_mass(data):
     filtered = []
     for i in range(1,len(data)):
@@ -159,7 +139,7 @@ def scatter_plot(combined, plot_name, plot_title, marker_size, fit_type="none"):
         plt.scatter(x, y, s=marker_size, marker='o')
     else:
         plt.errorbar(x=x,y=y, yerr=error, fmt='o',markersize=4.0)
-    #plt.tight_layout()
+    plt.tight_layout()
     plt.rcParams["figure.figsize"] = (8, 4.5)
 
     #x_inc, y_inc = exclude_dips(x_float,y)
@@ -180,19 +160,28 @@ def scatter_plot(combined, plot_name, plot_title, marker_size, fit_type="none"):
     plt.savefig("SavedPlots/" + plot_name + ".png")
     plt.show()
 
-def exclude_dips(data):
+def exclude_data(data, excluded_ranges):
     data_inc = []
-    exclude_count = 0
     for i in range(1,len(data)):
         exclude = 0
-        for j in range(len(dip_mjd_ranges)):
-            if float(data[i][0]) >= dip_mjd_ranges[j][0] and float(data[i][0]) <= dip_mjd_ranges[j][1]:
-                exclude_count += 1
+        for j in range(len(excluded_ranges)):
+            if float(data[i][0]) >= excluded_ranges[j][0] and float(data[i][0]) <= excluded_ranges[j][1]:
                 exclude = 1
         if exclude == 0:
             data_inc.append([data[i][0],data[i][1],data[i][2],data[i][3]])
     data_inc = np.array(data_inc)
-    print("excluded for fitting: ", exclude_count)
+    return data_inc
+
+def include_data(data, included_ranges):
+    data_inc = []
+    for i in range(1,len(data)):
+        include = 0
+        for j in range(len(included_ranges)):
+            if float(data[i][0]) >= included_ranges[j][0] and float(data[i][0]) <= included_ranges[j][1]:
+                include = 1
+        if include == 1:
+            data_inc.append([data[i][0],data[i][1],data[i][2],data[i][3]])
+    data_inc = np.array(data_inc)
     return data_inc
 
 def mjddates_to_gregoriandates(mjd):
