@@ -107,7 +107,7 @@ def scatter_plot(combined, plot_name, plot_title, marker_size, fit_type="none"):
     plt.ylabel("V-Mag")
     start_date = x[0]
     end_date = x[len(x)-1]
-    title = plot_title + "\nCurve: 11.8400+ .0880*exp(-(doy_2016 - 1083.) ^ 2 / (617 ^ 2))\n(" + str(start_date) + " to " + str(end_date) + ")"
+    title = "KIC 84682842\n" + plot_title + "\nCurve: 11.8400+ .0880*exp(-(doy_2016 - 1083.) ^ 2 / (617 ^ 2))\n(" + str(start_date) + " to " + str(end_date) + ")"
     # default scale is 1 in your original case, scales with other cases:
 
     plt.title(title)
