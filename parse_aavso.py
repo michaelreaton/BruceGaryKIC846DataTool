@@ -7,7 +7,7 @@ import scipy.optimize as opt
 dip_jd_ranges = [[2457891.,2457897.],[2457915.,2457932.],[2457964.,2457981.]]
 
 def main():
-    header = [['Avg MJD','Avg V-mag','Avg UNC','Avg Air Mass','Observation Count','Uncertainty']]
+    header = [['Avg JD','Avg V-mag','Avg UNC','Avg Air Mass','Observation Count','Uncertainty']]
     parsed = read_all_band_data()
     v_band = filter_by_band(parsed,"V")
     v_band = exclude_data(v_band,dip_jd_ranges)
