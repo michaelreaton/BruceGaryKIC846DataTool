@@ -12,7 +12,7 @@ def main():
     v_band = filter_by_band(parsed,"V")
     v_band = exclude_data(v_band,dip_jd_ranges)
     v_band_weekly_bins = get_bins(v_band,60*60*24*7,.001)
-    scatter_plot(v_band_weekly_bins,plot_name="aavso_vband_1_week_bins_scatter", plot_title="AAVSO 1 weeks bins, air mass <= 2, uncertainty < .001",marker_size=16)
+    scatter_plot(v_band_weekly_bins,plot_name="aavso_vband_1_week_bins_scatter", plot_title="AAVSO 1 weeks bins, air mass <= 2, bin uncertainty < .001",marker_size=16)
     write_csv(header+v_band_weekly_bins,"aavso_vband_data_good_air_weekly_bins_dips_excluded")
 
     #print(v_band_daily_bins)
