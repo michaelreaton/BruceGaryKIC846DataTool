@@ -1,11 +1,14 @@
 # Bruce Gary KIC846 DataTool
-A tool for combining and analyzing Bruce Gary's KIC846 data. All of the data and other great analysis is available on Bruce's sites:
+A tool for combining and analyzing Bruce Gary's KIC846 data. This is an amateur effort and needs improvements. I'm learning as I go. All of the data and other great analysis are available sites:
+
+Source Data can be obtained at:
+
+
+Current: http://www.brucegary.net/ts3/
 
 Current: http://www.brucegary.net/ts/
 
-and
-
-Old: http://www.brucegary.net/KIC846/
+http://www.brucegary.net/KIC846/
 
 
 
