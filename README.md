@@ -4,9 +4,9 @@ A tool for combining and analyzing Bruce Gary's KIC846 data. This is an amateur 
 Source Data can be obtained at:
 
 
-Current: http://www.brucegary.net/ts3/
+http://www.brucegary.net/ts3/
 
-Current: http://www.brucegary.net/ts/
+http://www.brucegary.net/ts/
 
 http://www.brucegary.net/KIC846/
 
