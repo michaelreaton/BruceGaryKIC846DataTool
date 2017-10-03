@@ -44,7 +44,7 @@ def main():
     scatter_plot(vband_hourly_bins,plot_name="vband_scatter_good_air_hourly_bins", plot_title="Bruce Gary V Band Hourly Bins Air Mass <= 2.0",marker_size=16)
 
     write_csv(header+gbandCombined,"g'band_bruce_gary_raw_data_combined")
-    scatter_plot(vbandCombined,plot_name="g'band_scatter", plot_title="Bruce Gary g' Band Raw Data Unmodified",marker_size=1)
+    scatter_plot(gbandCombined,plot_name="g'band_scatter", plot_title="Bruce Gary g' Band Raw Data Unmodified",marker_size=1)
     write_csv(header+gband_combined_good_air,"g'band_bruce_gary_raw_data_good_air_combined")
     scatter_plot(gband_combined_good_air,plot_name="g'band_scatter_good_air", plot_title="Bruce Gary g' Band Raw Data Air Mass <= 2.0",marker_size=1)
     gband_daily_bins = get_bins(gband_combined_good_air,60*60*24)
