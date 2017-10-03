@@ -1,8 +1,9 @@
 # Bruce Gary KIC846 DataTool
-A tool for combining and analyzing Bruce Gary's KIC846 data. This is an amateur effort and needs improvements. I'm learning as I go. All of the data and other great analysis are available sites:
+A tool for combining and analyzing Bruce Gary's KIC846 data. This is an amateur effort (not associated with Bruce Gary or AAVSO in any kind of way) and needs improvements. I'm learning as I go. All of the data and other great analysis are available sites:
 
 Source Data can be obtained at:
 
+http://www.brucegary.net/ts4/
 
 http://www.brucegary.net/ts3/
 
