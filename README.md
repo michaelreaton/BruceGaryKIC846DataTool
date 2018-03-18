@@ -3,6 +3,8 @@ A tool for combining and analyzing Bruce Gary's KIC846 data. This is an amateur 
 
 Source data can be obtained at:
 
+http://www.brucegary.net/ts6/
+
 http://www.brucegary.net/ts5/
 
 http://www.brucegary.net/ts4/
